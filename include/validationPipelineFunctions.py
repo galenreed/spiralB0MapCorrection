@@ -56,12 +56,13 @@ def sumImaginaryComponent(img, mask):
 def gradientObjectiveFunction(img, kernelSize, mask):
     imgGrad = imageGrad(img,kernelSize)
     return meanUpperQuantileImage(imgGrad,mask, .75)
+    #return meanUpperQuantileImage(imgGrad,mask, .75)
 
 # doesn't work too well
 def gradientObjectiveFunction2(img, kernelSize, mask):
     imgGrad = imageGrad(img,kernelSize)
     gradInt2 = floatToInt2(grad)
-    thresh = imageThresh(gradInt2)
+    thresh = imageThresh(img)
     jointMask = imageAnd(thresh,mask)
     imgMaskPixels = img[jointMask>0]
     uq = np.quantile(img, .75)
