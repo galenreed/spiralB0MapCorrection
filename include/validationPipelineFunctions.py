@@ -91,3 +91,50 @@ def findPeakSignalImages(mfi, maskPixels, globalOnResInd):
         peakTime[im] = np.argmax(peakTimeSignal[im,:])
     
     return peakTime
+
+
+
+def applyObjectiveMetric(freqAxis, globalFreqSearch, mfr, mfi, mf, peakTime, maskPixels):
+    kernelSize = 3
+    ngf = len(globalFreqSearch)
+
+    peakSignalUncorr = np.zeros((3,ngf))
+    peakSignalSeg = np.zeros((3,ngf))
+    peakSignalMFI = np.zeros((3,ngf))
+
+    maxSigUncorr = np.zeros((3,ngf))
+    maxSigSeg = np.zeros((3,ngf))
+    maxSigMFI = np.zeros((3,ngf))
+
+    
+    for gf in range(ngf):
+
+        indf = closestIndex(globalFreqSearch[gf], freqAxis)
+
+        for im in range(3):                      
+
+            im_unc = mfr[:,:, int(peakTime[im]), im, indf]
+            im_mfi = mfi[:,:, int(peakTime[im]), im, gf]
+            im_seg =  mf[:,:, int(peakTime[im]), im, gf]
+            noise = mf[:,:, 7, im, gf]
+            im_unc  = calcSNR(im_unc, noise)
+            im_mfi  = calcSNR(im_mfi, noise)
+            im_seg  = calcSNR(im_seg, noise)
+
+            #sumImaginaryComponent
+            #minImagUncorr[im,gf] = sumImaginaryComponent(im_unc, maskPixels)
+            #minImagSeg[im,gf]    = sumImaginaryComponent(im_mfi, maskPixels)
+            #minImagMFI[im,gf]    = sumImaginaryComponent(im_seg, maskPixels)
+
+            maxSigUncorr[im,gf] = meanUpperQuantileImage(np.abs(im_unc), maskPixels, .75)
+            maxSigSeg[im,gf]    = meanUpperQuantileImage(np.abs(im_mfi), maskPixels, .75)
+            maxSigMFI[im,gf]    = meanUpperQuantileImage(np.abs(im_seg), maskPixels, .75)
+
+            #gradient sharpness based processing
+            peakSignalUncorr[im,gf] = gradientObjectiveFunction(np.abs(im_unc), kernelSize, maskPixels)
+            peakSignalMFI[im,gf]    = gradientObjectiveFunction(np.abs(im_mfi), kernelSize, maskPixels)
+            peakSignalSeg[im,gf]    = gradientObjectiveFunction(np.abs(im_seg), kernelSize, maskPixels)
+    
+
+    
+    return peakSignalUncorr, peakSignalMFI, peakSignalSeg
