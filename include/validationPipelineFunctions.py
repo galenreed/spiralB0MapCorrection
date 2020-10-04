@@ -55,7 +55,7 @@ def sumImaginaryComponent(img, mask):
 # works ok
 def gradientObjectiveFunction(img, kernelSize, mask):
     imgGrad = imageGrad(img,kernelSize)
-    return meanUpperQuantileImage(imgGrad,mask, .75)
+    return meanUpperQuantileImage(imgGrad,mask, .50)
     #return meanUpperQuantileImage(imgGrad,mask, .75)
 
 # doesn't work too well
