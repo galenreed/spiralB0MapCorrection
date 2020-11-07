@@ -12,6 +12,9 @@ import cardiacDicomGlobals as cdg
 def closestIndex(f, faxis):
     return np.argmin(np.abs(faxis-f))
 
+def calcSNR(img, noise):
+    noiseEst = np.std(noise[0:10,0:10])
+    return (img / noiseEst)
 
 
 def floatToInt2(img):
@@ -20,8 +23,8 @@ def floatToInt2(img):
 
 def imageGrad(img,kernelSize):
     #$laplacian = cv2.Laplacian(testImg, cv2.CV_64F)
-    sobelx = cv2.Sobel(img,cv2.CV_64F,1,0,ksize=kernelSize)
-    sobely = cv2.Sobel(img,cv2.CV_64F,0,1,ksize=kernelSize)
+    sobelx = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=kernelSize)
+    sobely = cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=kernelSize)
     sobelxy = np.sqrt(np.multiply(sobelx, sobelx) + np.multiply(sobely, sobely))
     return sobelxy
 
@@ -55,8 +58,16 @@ def sumImaginaryComponent(img, mask):
 # works ok
 def gradientObjectiveFunction(img, kernelSize, mask):
     imgGrad = imageGrad(img,kernelSize)
-    return meanUpperQuantileImage(imgGrad,mask, .50)
+    return meanUpperQuantileImage(imgGrad, mask, .50)
     #return meanUpperQuantileImage(imgGrad,mask, .75)
+    
+def gradientObjectiveFunctionSNRConstraint(img, kernelSize, mask):
+    snrCutoff = 5
+    imgGrad = imageGrad(img, kernelSize)
+    strongGradientPixels = imgGrad[(img>snrCutoff) & (mask>0)]
+    #uq = np.quantile(strongGradientPixels, 0.5)
+    return np.mean(strongGradientPixels) 
+    
 
 # doesn't work too well
 def gradientObjectiveFunction2(img, kernelSize, mask):
@@ -69,9 +80,6 @@ def gradientObjectiveFunction2(img, kernelSize, mask):
     return np.mean(imgMaskPixels)
 
     
-def calcSNR(img, noise):
-    noiseEst = np.std(noise[0:20,0:20])
-    return (img / noiseEst)
 
 def findPeakSignalImages(mfi, maskPixels, globalOnResInd):
     ntime = mfi.shape[2]
@@ -122,10 +130,6 @@ def applyObjectiveMetric(freqAxis, globalFreqSearch, mfr, mfi, mf, peakTime, mas
             im_mfi  = calcSNR(im_mfi, noise)
             im_seg  = calcSNR(im_seg, noise)
 
-            #sumImaginaryComponent
-            #minImagUncorr[im,gf] = sumImaginaryComponent(im_unc, maskPixels)
-            #minImagSeg[im,gf]    = sumImaginaryComponent(im_mfi, maskPixels)
-            #minImagMFI[im,gf]    = sumImaginaryComponent(im_seg, maskPixels)
 
             maxSigUncorr[im,gf] = meanUpperQuantileImage(np.abs(im_unc), maskPixels, .75)
             maxSigSeg[im,gf]    = meanUpperQuantileImage(np.abs(im_mfi), maskPixels, .75)
@@ -135,7 +139,12 @@ def applyObjectiveMetric(freqAxis, globalFreqSearch, mfr, mfi, mf, peakTime, mas
             peakSignalUncorr[im,gf] = gradientObjectiveFunction(np.abs(im_unc), kernelSize, maskPixels)
             peakSignalMFI[im,gf]    = gradientObjectiveFunction(np.abs(im_mfi), kernelSize, maskPixels)
             peakSignalSeg[im,gf]    = gradientObjectiveFunction(np.abs(im_seg), kernelSize, maskPixels)
+            
+            #peakSignalUncorr[im,gf] = gradientObjectiveFunctionSNRConstraint(np.abs(im_unc), kernelSize, maskPixels)
+            #peakSignalMFI[im,gf]    = gradientObjectiveFunctionSNRConstraint(np.abs(im_mfi), kernelSize, maskPixels)
+            #peakSignalSeg[im,gf]    = gradientObjectiveFunctionSNRConstraint(np.abs(im_seg), kernelSize, maskPixels)
     
 
+    
     
     return peakSignalUncorr, peakSignalMFI, peakSignalSeg

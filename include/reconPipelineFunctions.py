@@ -9,6 +9,10 @@ from scipy import linalg
 from scipy.io import loadmat, savemat
 import cardiacDicomGlobals as cdg
 
+
+channelList = [5,6,7]
+
+
 def closestIndex(f, faxis):
     return np.argmin(np.abs(faxis-f))
 
@@ -61,7 +65,7 @@ def resampleSITKImage(static, floating):
     resample = sitk.ResampleImageFilter()
     resample.SetReferenceImage(static)
     resample.SetInterpolator(sitk.sitkBSpline)
-    resample.AddCommand(sitk.sitkProgressEvent, lambda: print("\rProgress: {0:03.1f}%...".format(100*resample.GetProgress()),end=''))
+    resample.AddCommand(sitk.sitkProgressEvent, lambda: print("\rProgress:{0:03.1f}%...".format(100*resample.GetProgress()),end=''))
     resample.AddCommand(sitk.sitkProgressEvent, lambda: sys.stdout.flush())
     return resample.Execute(floating)
 
@@ -74,8 +78,10 @@ def getThresholdFromLoc(loc):
     locMask = cv2.dilate(thresh1, kernel,iterations = 2)
     return locMask
 
-def loadMultiFrequencyFiles(currentPatient, freqAxis, multiCoilProcessing):
+def loadMultiFrequencyFiles(currentPatient, freqAxis):
 
+
+    
     #load mat files for multi frequency recon
     matFileBase = currentPatient.mfr
     sampleFile= 'matFilesIntermediate/' + matFileBase + '_f' + str(1) + '.mat'
@@ -92,7 +98,7 @@ def loadMultiFrequencyFiles(currentPatient, freqAxis, multiCoilProcessing):
     mfr = np.zeros((nx, ny, ntime, nmet, nf), dtype = np.cdouble)
 
     #for storing complex images 
-    if multiCoilProcessing:
+    if currentPatient.multichannel:
         ncoils = arrayShape[4]
         mfrc = np.zeros((nx, ny, ntime, nmet, ncoils, nf), dtype = np.cdouble)
     else:
@@ -105,7 +111,7 @@ def loadMultiFrequencyFiles(currentPatient, freqAxis, multiCoilProcessing):
 
         #print('on frequency '+str(f+1)+' of ' + str(len(freqAxis)))
         currentFile= 'matFilesIntermediate/' + matFileBase + '_f' + str(f+1) + '.mat'
-        if multiCoilProcessing:
+        if currentPatient.multichannel:
             pixelArrayComplex = loadmat(currentFile)['bb']
             pixelArrayComplex = np.squeeze(np.cdouble(pixelArrayComplex))
             mfrc[:,:,:,:,:,f] = pixelArrayComplex

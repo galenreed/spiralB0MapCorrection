@@ -12,6 +12,7 @@ class patientExam:
         self.b0phase = []
         self.mfr = []
         self.readout = []
+        self.multichannel = []
          
 def horosPath(num):
     outStr =  '/Users/galenreed/Documents/Horos Data/DATABASE.noindex/10000/' + str(num) + '.dcm'
@@ -53,6 +54,8 @@ P20200721L.b0mag = horosPath(7419)
 P20200721L.mask = 'masks/P2020_0721_long.png'
 P20200721L.mfr = 'P10'
 P20200721L.readout = readouts[0]
+P20200721L.multichannel = False
+
 
 P20200721S = patientExam()
 P20200721S.loc = horosPath(7370)
@@ -62,6 +65,7 @@ P20200721S.b0mag = horosPath(7419)
 P20200721S.mask = 'masks/P2020_0721_long.png'
 P20200721S.mfr = 'P11'
 P20200721S.readout = readouts[1]
+P20200721S.multichannel = False
 
 P20200715L = patientExam()
 P20200715L.loc = horosPath(7086)
@@ -71,6 +75,7 @@ P20200715L.b0mag  = horosPath(7043)
 P20200715L.mask = 'masks/P2020_0715.png'
 P20200715L.mfr = 'P8'
 P20200715L.readout = readouts[0]
+P20200715L.multichannel = False
 
 
 P20200715S = patientExam()
@@ -81,6 +86,7 @@ P20200715S.b0mag  = horosPath(7043)
 P20200715S.mask = 'masks/P2020_0715.png'
 P20200715S.mfr = 'P9'
 P20200715S.readout = readouts[1]
+P20200715S.multichannel = False
 
 
 # low bicarb, repeated twice and slightly higher the second time. 
@@ -92,6 +98,7 @@ P20200123S.b0phase = horosPath(3543)
 P20200123S.mask = 'masks/P2020_0123.png'
 P20200123S.mfr = 'P7'
 P20200123S.readout = readouts[1]
+P20200123S.multichannel = False
 
 #12/06 no bicarbonate, 2 subjects 
 
@@ -103,6 +110,7 @@ P20191120S.b0phase = horosPath(815)
 P20191120S.mask = 'masks/P2019_1120.png'
 P20191120S.mfr = 'P3'
 P20191120S.readout = readouts[1]
+P20191120S.multichannel = False
 
 # hashoian coil 
 P20191031 = patientExam()
@@ -113,6 +121,7 @@ P20191031.b0phase = horosPath(305)
 P20191031.mask = 'masks/P2019_1031.png'
 P20191031.mfr = 'P2'
 P20191031.readout = readouts[0]
+P20191031.multichannel = True
 
 # pulseteq coil
 P20191031L = patientExam()
@@ -123,6 +132,7 @@ P20191031L.b0phase = horosPath(81)
 P20191031L.mask = 'masks/P2019_1031_pulseteq.png'
 P20191031L.mfr = 'P1'
 P20191031L.readout = readouts[0]
+P20191031L.multichannel = False
 
 
 #patientList = [P20200721L, P20200721S, P20200715L, P20200715S, P20200123S, P20191120S, P20191031, P20191031L]
