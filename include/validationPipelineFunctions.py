@@ -7,6 +7,7 @@ from myshow import myshow
 import sys
 from scipy import linalg
 from scipy.io import loadmat, savemat
+
 import cardiacDicomGlobals as cdg
 
 def closestIndex(f, faxis):
@@ -29,13 +30,13 @@ def imageGrad(img,kernelSize):
     return sobelxy
 
 def imageThresh(img):
-    # global thresholding
-    ret1,th1 = cv2.threshold(img,80,255,cv2.THRESH_BINARY)
-    
-    # otsu thresholding
-    #ret2,th2 = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    
-    return th1
+    imgint2 = floatToInt2(img)
+    ret1,th1 = cv2.threshold(imgint2,50,255,cv2.THRESH_BINARY)
+    #ret2,th2 = cv2.threshold(grdint2,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    kernel = np.ones((2,2),np.uint8)
+    opening = cv2.morphologyEx(th1, cv2.MORPH_OPEN, kernel)
+    return opening
+
 
 def imageAnd(im1,im2):
     return cv2.bitwise_and(im1,im2)
@@ -60,6 +61,19 @@ def gradientObjectiveFunction(img, kernelSize, mask):
     imgGrad = imageGrad(img,kernelSize)
     return meanUpperQuantileImage(imgGrad, mask, .50)
     #return meanUpperQuantileImage(imgGrad,mask, .75)
+    
+def tenengradSharpness(img, kernelSize):
+    imgGrad = imageGrad(img,kernelSize)
+    th1 = imageThresh(imgGrad)
+    
+    pixels = imgGrad[th1>0]
+    
+    # tenengrad
+    #return np.mean(pixels*pixels)
+    
+    # sobel variance
+    return np.var(pixels)
+    
     
 def gradientObjectiveFunctionSNRConstraint(img, kernelSize, mask):
     snrCutoff = 5
@@ -136,13 +150,13 @@ def applyObjectiveMetric(freqAxis, globalFreqSearch, mfr, mfi, mf, peakTime, mas
             maxSigMFI[im,gf]    = meanUpperQuantileImage(np.abs(im_seg), maskPixels, .75)
 
             #gradient sharpness based processing
-            peakSignalUncorr[im,gf] = gradientObjectiveFunction(np.abs(im_unc), kernelSize, maskPixels)
-            peakSignalMFI[im,gf]    = gradientObjectiveFunction(np.abs(im_mfi), kernelSize, maskPixels)
-            peakSignalSeg[im,gf]    = gradientObjectiveFunction(np.abs(im_seg), kernelSize, maskPixels)
+            #peakSignalUncorr[im,gf] = gradientObjectiveFunction(np.abs(im_unc), kernelSize, maskPixels)
+            #peakSignalMFI[im,gf]    = gradientObjectiveFunction(np.abs(im_mfi), kernelSize, maskPixels)
+            #peakSignalSeg[im,gf]    = gradientObjectiveFunction(np.abs(im_seg), kernelSize, maskPixels)
             
-            #peakSignalUncorr[im,gf] = gradientObjectiveFunctionSNRConstraint(np.abs(im_unc), kernelSize, maskPixels)
-            #peakSignalMFI[im,gf]    = gradientObjectiveFunctionSNRConstraint(np.abs(im_mfi), kernelSize, maskPixels)
-            #peakSignalSeg[im,gf]    = gradientObjectiveFunctionSNRConstraint(np.abs(im_seg), kernelSize, maskPixels)
+            peakSignalUncorr[im,gf] = tenengradSharpness(np.abs(im_unc), kernelSize)
+            peakSignalMFI[im,gf]    = tenengradSharpness(np.abs(im_mfi), kernelSize)
+            peakSignalSeg[im,gf]    = tenengradSharpness(np.abs(im_seg), kernelSize)
     
 
     

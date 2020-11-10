@@ -55,6 +55,7 @@ P20200721L.mask = 'masks/P2020_0721_long.png'
 P20200721L.mfr = 'P10'
 P20200721L.readout = readouts[0]
 P20200721L.multichannel = False
+P20200721L.circle = [142,131,20]
 
 
 P20200721S = patientExam()
@@ -66,6 +67,8 @@ P20200721S.mask = 'masks/P2020_0721_long.png'
 P20200721S.mfr = 'P11'
 P20200721S.readout = readouts[1]
 P20200721S.multichannel = False
+P20200721S.circle = [142,131,20]
+
 
 P20200715L = patientExam()
 P20200715L.loc = horosPath(7086)
@@ -76,6 +79,7 @@ P20200715L.mask = 'masks/P2020_0715.png'
 P20200715L.mfr = 'P8'
 P20200715L.readout = readouts[0]
 P20200715L.multichannel = False
+P20200715L.circle = [133,126,16]
 
 
 P20200715S = patientExam()
@@ -87,6 +91,7 @@ P20200715S.mask = 'masks/P2020_0715.png'
 P20200715S.mfr = 'P9'
 P20200715S.readout = readouts[1]
 P20200715S.multichannel = False
+P20200715S.circle = [133,126,16]
 
 
 # low bicarb, repeated twice and slightly higher the second time. 
@@ -99,6 +104,7 @@ P20200123S.mask = 'masks/P2020_0123.png'
 P20200123S.mfr = 'P7'
 P20200123S.readout = readouts[1]
 P20200123S.multichannel = False
+P20200123S.circle = [135,125,22]
 
 #12/06 no bicarbonate, 2 subjects 
 
@@ -111,6 +117,7 @@ P20191120S.mask = 'masks/P2019_1120.png'
 P20191120S.mfr = 'P3'
 P20191120S.readout = readouts[1]
 P20191120S.multichannel = False
+P20191120S.circle = [126,124,20]
 
 # hashoian coil 
 P20191031 = patientExam()
@@ -122,6 +129,8 @@ P20191031.mask = 'masks/P2019_1031.png'
 P20191031.mfr = 'P2'
 P20191031.readout = readouts[0]
 P20191031.multichannel = True
+P20191031.circle = [133,127,21]
+
 
 # pulseteq coil
 P20191031L = patientExam()
@@ -133,11 +142,12 @@ P20191031L.mask = 'masks/P2019_1031_pulseteq.png'
 P20191031L.mfr = 'P1'
 P20191031L.readout = readouts[0]
 P20191031L.multichannel = False
+P20191031L.circle = [126,130,20]
 
 
-#patientList = [P20200721L, P20200721S, P20200715L, P20200715S, P20200123S, P20191120S, P20191031, P20191031L]
+patientList = [P20200721L, P20200721S, P20200715L, P20200715S, P20200123S, P20191120S, P20191031, P20191031L]
 # just do acquisitions with pulseteq coil
-patientList = [P20200721L, P20200721S, P20200715L, P20200715S, P20200123S, P20191120S, P20191031L]
+#patientList = [P20200721L, P20200721S, P20200715L, P20200715S, P20200123S, P20191120S, P20191031L]
 
 
 
