@@ -276,5 +276,20 @@ def resampleCardiacBinImages(binImages, loc_sitk, target_sitk):
     return binImages_res
 
 
+#
+#this section of code is just to translate the center from loc coords to c13 coords
+#this is done by making an impulse image at the center then resampling and finding the max
+def resampleCircleCenterCoords(circleCenterCoords, imgsource, imgtarget):
+    locPixels = np.squeeze(sitk.GetArrayFromImage(imgsource))
+    centerImpulse = np.zeros(locPixels.shape, dtype=np.uint16)
+    centerImpulse[circleCenterCoords[0], circleCenterCoords[1]] = 255
+    centerImpulse = np.expand_dims(centerImpulse, axis=0)
+    centerImpulse = sitk.GetImageFromArray(centerImpulse)
+    centerImpulse.CopyInformation(imgsource)
+    centerImpulse = resampleSITKImage(imgtarget, centerImpulse)
+    centerImpulse = np.squeeze(sitk.GetArrayFromImage(centerImpulse))
+    maxInd = centerImpulse.argmax()
+    circleLocsC13Coords = np.unravel_index(maxInd, centerImpulse.shape)    
+    return circleLocsC13Coords
 
 
