@@ -9,6 +9,7 @@ from scipy import linalg
 from scipy.io import loadmat, savemat
 import cardiacDicomGlobals as cdg
 import validationPipelineFunctions as validate
+import scipy.ndimage
 
 
 channelList = [5,6,7]
@@ -291,5 +292,62 @@ def resampleCircleCenterCoords(circleCenterCoords, imgsource, imgtarget):
     maxInd = centerImpulse.argmax()
     circleLocsC13Coords = np.unravel_index(maxInd, centerImpulse.shape)    
     return circleLocsC13Coords
+
+def makeLineProfiles(startPoint, endPoint, img, num):
+    x0 = startPoint[0]
+    y0 = startPoint[1]
+    x1 = endPoint[0]
+    y1 = endPoint[1]
+    x, y = np.linspace(x0, x1, num), np.linspace(y0, y1, num)
+    zi = scipy.ndimage.map_coordinates(img, np.vstack((x,y)))
+    return zi
+
+
+def generateRadialEndpoints(circleCenter, numThetaBins, segRadius):
+    dTheta = 2*np.pi/numThetaBins
+    theta = np.linspace(0, 2*np.pi-dTheta, numThetaBins)
+    endPoints = np.zeros([numThetaBins, 2])
+    for x in range(numThetaBins):
+        endPoints[x,0] = circleCenter[0] + segRadius*np.cos(theta[x])
+        endPoints[x,1] = circleCenter[1] + segRadius*np.sin(theta[x])
+    return endPoints
+
+
+def fwhm(signal):
+    maxVal = signal.max()
+    minVal = signal.min()
+    indMax = np.argmax(signal)
+
+    if maxVal < 5: # too low SNR for this to really work
+        return -1
+    
+    # extremum is at the edge, so data probably not that interesting
+    if (indMax == 0) or (indMax == len(signal)-1):
+        return -1
+    
+    
+    found = False
+    upIndex = indMax
+    downIndex = indMax
+    
+    while found == False:
+        upIndex += 1
+        if signal[upIndex] <= maxVal/2:
+            found = True
+        if upIndex == len(signal)-1:# never found half max
+            return -1
+            
+    found = False
+    while found == False:
+        downIndex -= 1
+        if signal[downIndex] <= maxVal/2:
+            found = True
+        if downIndex == 0: # never found half max
+            return -1
+    
+    #print('half max found at '+str(upIndex))
+    #print('half max found at '+str(downIndex))
+    return(upIndex-downIndex)
+
 
 
