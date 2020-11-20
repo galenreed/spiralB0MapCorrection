@@ -351,3 +351,30 @@ def fwhm(signal):
 
 
 
+def generateLineProfilesBinned(img, NBins, NRadialSamples, centerCoords, segRadius):
+    #numDegrees = 360
+    numDegrees = NBins
+    img = img / np.std(img[1:20,1:20])
+    zi = np.zeros([NBins, NRadialSamples])
+    zi_fine = np.zeros([numDegrees, NRadialSamples])
+    endPointsFine = generateRadialEndpoints(centerCoords, numDegrees, segRadius)
+
+    # generate line profiles
+    for ind in range(numDegrees):
+        x1 = endPointsFine[ind,0]
+        y1 = endPointsFine[ind,1]
+        zi_fine[ind][:] = makeLineProfiles(centerCoords, (x1,y1), img, NRadialSamples)  
+    
+    # accumulate to coarses theta resolution
+    lineAccumulator = np.zeros(NRadialSamples)
+    slowCounter = 0
+    projectionsPerBin = np.floor(numDegrees/NBins)
+    for ind in range(numDegrees):
+        lineAccumulator += zi_fine[ind][:]
+        if(int(ind % projectionsPerBin) == projectionsPerBin-1):
+            zi[slowCounter][:] = lineAccumulator
+            lineAccumulator = lineAccumulator*0.0
+            slowCounter += 1
+            
+    return zi
+
