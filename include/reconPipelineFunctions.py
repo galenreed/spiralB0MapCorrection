@@ -80,13 +80,18 @@ def getThresholdFromLoc(loc):
     locMask = cv2.dilate(thresh1, kernel,iterations = 2)
     return locMask
 
-def loadMultiFrequencyFiles(currentPatient, freqAxis):
+def loadMultiFrequencyFiles(currentPatient, freqAxis, isExample):
 
 
     
     #load mat files for multi frequency recon
     matFileBase = currentPatient.mfr
-    sampleFile= 'matFilesIntermediate/' + matFileBase + '_f' + str(1) + '.mat'
+    if isExample:
+        matFileBase = 'exampleData/freqReconstructions/' + matFileBase
+    else:
+        matFileBase = 'matFilesIntermediate/' + matFileBase
+        
+    sampleFile = matFileBase + '_f' + str(1) + '.mat'
     array = loadmat(sampleFile)['bb']
     array = np.squeeze(np.cdouble(array))
     arrayShape = array.shape
@@ -112,7 +117,7 @@ def loadMultiFrequencyFiles(currentPatient, freqAxis):
     for f in range(len(freqAxis)):
 
         #print('on frequency '+str(f+1)+' of ' + str(len(freqAxis)))
-        currentFile= 'matFilesIntermediate/' + matFileBase + '_f' + str(f+1) + '.mat'
+        currentFile = matFileBase + '_f' + str(f+1) + '.mat'
         if currentPatient.multichannel:
             pixelArrayComplex = loadmat(currentFile)['bb']
             pixelArrayComplex = np.squeeze(np.cdouble(pixelArrayComplex))
